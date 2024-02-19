@@ -1,5 +1,9 @@
-
-using Project.Entities;
+using Microsoft.EntityFrameworkCore;
+using Project.MappingProfiles;
+using Project.Repositories.Implementations;
+using Project.Repositories.Interfaces;
+using Project.Services.Implementations;
+using Project.Services.Interfaces;
 
 namespace Project;
 
@@ -7,36 +11,22 @@ public class Program
 {
     public static void Main(string[] args)
     {
-        using (ApplicationContext db = new ApplicationContext())
-        {
-            Category cat = new()
-            {
-                Id = default,
-                Name = "Test"
-            };
-            Product first = new Product()
-            {
-                Id = default,
-                Name = "test",
-                Count = 1,
-                Price = 1,
-                Category = cat
-            };
-
-            // добавляем их в бд
-            db.Products.Add(first);
-            //db.Categories.Add(cat);
-            db.SaveChanges();
-        }
         var builder = WebApplication.CreateBuilder(args);
 
         // Add services to the container.
-
+        builder.Services.AddAutoMapper(typeof(ApplicationToApiMappingProfile), typeof(DataToApplicationMappingProfile));
         builder.Services.AddControllers();
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
-        builder.Services.AddScoped<ApplicationContext>();
+        builder.Services.AddDbContext<ApplicationContext>(options =>
+        {
+            options.UseSqlServer(builder.Configuration.GetConnectionString("PracticeDB"));
+        });
+        builder.Services.AddScoped<IProductService, ProductService>();
+        builder.Services.AddScoped<IProductRepository, ProductRepository>();
+        builder.Services.AddScoped<ICategoryService, CategoryService>();
+        builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 
         var app = builder.Build();
 
