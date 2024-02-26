@@ -1,11 +1,8 @@
 using Microsoft.EntityFrameworkCore;
-using Project.MappingProfiles;
-using Project.Repositories.Implementations;
-using Project.Repositories.Interfaces;
-using Project.Services.Implementations;
-using Project.Services.Interfaces;
+using BLL.MappingProfiles;
+using DAL;
 
-namespace Project;
+namespace API;
 
 public class Program
 {
@@ -23,10 +20,9 @@ public class Program
         {
             options.UseSqlServer(builder.Configuration.GetConnectionString("PracticeDB"));
         });
-        builder.Services.AddScoped<IProductService, ProductService>();
-        builder.Services.AddScoped<IProductRepository, ProductRepository>();
-        builder.Services.AddScoped<ICategoryService, CategoryService>();
-        builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+
+        builder.Services.AddApplicationServices();
+
 
         var app = builder.Build();
 

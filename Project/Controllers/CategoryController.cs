@@ -1,11 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
-using AutoMapper;
-using Project.Entities;
-using Project.DTObjects.Category;
-using Project.Services.Interfaces;
+using BLL.Services.Interfaces;
+using BLL.DTObjects.Category;
 
 
-namespace Project.Controllers;
+namespace API.Controllers;
 
 [ApiController]
 [Route("[controller]")]
@@ -13,71 +11,51 @@ public class CategoryController : ControllerBase
 {
 
     private readonly ICategoryService _service;
-    private readonly IMapper _mapper;
 
-    public CategoryController(ICategoryService service, IMapper mapper)
+    public CategoryController(ICategoryService service)
     {
         _service = service;
-        _mapper = mapper;
     }
 
     [HttpGet()]
-    public IEnumerable<DefaultCategoryOutput> GetAll()
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAllAsync()
     {
-        return _mapper.Map<IEnumerable<DefaultCategoryOutput>>(_service.GetAll());
+        return await _service.GetAllAsync();
     }
 
-    [HttpGet("{id}")]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [HttpGet("getById")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public ActionResult<DefaultCategoryOutput> GetById(int id)
+    public async Task<IActionResult> GetByIdAsync(int id)
     {
-        var rez = _service.GetById(id);
-        if (rez is null)
-        {
-            return NotFound($"No category with Id {id}");
-        }
-        return _mapper.Map<DefaultCategoryOutput>(rez);
+        return await _service.GetByIdAsync(id);
     }
 
     [HttpGet("getByName")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public ActionResult<DefaultCategoryOutput> GetByName(String categoryName)
+    public async Task<IActionResult> GetByNameAsync(String categoryName)
     {
-        var rez = _service.GetByName(categoryName);
-        if (rez is null)
-        {
-            return Ok($"No category with name {categoryName}");
-        }
-        return new ActionResult<DefaultCategoryOutput>(_mapper.Map<DefaultCategoryOutput>(rez));
+        return await _service.GetByNameAsync(categoryName);
     }
 
     [HttpPost("add")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public ActionResult<string> Add(AddCategoryInput product)
+    public async Task<IActionResult> AddAsync(AddCategoryInput category)
     {
-        var local = _mapper.Map<CategoryEntity>(product);
-        _service.Add(local);
-        return Ok();
+        return await _service.AddAsync(category);
     }
 
     [HttpPost("change")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public ActionResult Change(ChangeCategoryInput product)
+    public async Task<IActionResult> ChangeAsync(ChangeCategoryInput category)
     {
-        var local = _mapper.Map<CategoryEntity>(product);
-        if (_service.Change(local))
-        {
-            return Ok("Success");
-        }
-        return Ok("Category not found");
+        return await _service.ChangeAsync(category);
     }
 
     [HttpGet("deleteById")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public ActionResult DeleteById(int id)
+    public async Task<IActionResult> DeleteByIdAsync(int id)
     {
-        _service.DeleteById(id);
-        return Ok();
+        return await _service.DeleteByIdAsync(id);
     }
 }
